@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="app">
+         <!-- 输入框区域 -->
+        <div style="height:50px">
+            <input type="text" placeholder="请输入电话号码" v-model="phoneNum">
+            <span>{{location}}</span>
+            <button @click="getFaceResult">确定</button>
+        </div>
+        <!-- 充值面值 显示区域 -->
+        <div>
+            充值面值：
+            <span v-for="item in faceList" :key='item'>
+                {{item}}
+            </span>
+            <a href="./00.html">ggggggggg</a>
+        </div>   
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+         new Vue({
+            el: '#app',
+            data: {
+                phoneNum: '12345',
+                faceList: [],
+                location:""
+            },
+            methods: {
+                getLocation(phoneNum){
+                    return axios.post("/phoneLocation",{
+                        phoneNum
+                    })
+                },
+                getFaceList(province, city){
+                    return axios.post('/faceList', {
+                        province,
+                        city
+                    })
+                },
+                //传统的promise.then()回调的方法
+                // getFaceResult() {
+                //     this.getLocation(this.phoneNum)
+                //         .then(res=>{
+                //             if(res.status===200&&res.data.success){
+                //                 let province = res.data.obj.province;
+                //                 let city = res.data.obj.city;
+                //                 this.location=res.data.obj.city;
+                //                 this.getFaceList(province,city)
+                //                     .then(res=>{
+                //                         if(res.status === 200 && res.data.success) {
+                //                             this.faceList = res.data.obj
+                //                          }
+                //                     })
+                //             }
+                //         })
+                //         .catch(err=>{
+                //             console.log(err)
+                //         })
+                // }
+                //async的方法
+                    async getFaceResult(){
+                        try{
+                            let location=await this.getLocation(this.phoneNum)
+                            if(location.data.success){
+                                let province = location.data.obj.province;
+                                let city = location.data.obj.city;
+                                this.location=location.data.obj.city;
+                                let result = await this.getFaceList(province, city);
+                                if (result.data.success) {
+                                    this.faceList = result.data.obj;
+                                }
+                            }
+                        }catch(error){
+                            console.log(error)
+                        }   
+                    }
+
+            }
+        })
+    </script>
+</body>
+</html>
